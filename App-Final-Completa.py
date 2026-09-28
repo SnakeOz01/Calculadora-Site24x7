@@ -6,13 +6,18 @@ from io import BytesIO
 import pandas as pd
 import streamlit as st
 
-st.set_page_config(page_title="Site24x7 Calculator Final Completa", layout="wide", page_icon="🔍")
+st.set_page_config(page_title="Site24x7 Calculator LicenseAmounts", layout="wide", page_icon="🔍")
 
 CONFIG_PATH = "Config-Fixed-V3.json"
-with open(CONFIG_PATH, "r", encoding="utf-8") as f:
-    CONFIG = json.load(f)
+# Fallback si no existe con ese nombre
+try:
+    with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+        CONFIG = json.load(f)
+except:
+    with open("config_fixed_v3.json", "r", encoding="utf-8") as f:
+        CONFIG = json.load(f)
 
-# --- HELPERS ---
+# --- HELPERS (sin cambios de App-Final-Completa) ---
 def addon_effective_size(opt):
     size = opt.get("size", 0)
     unit = str(opt.get("unit", "")).upper().strip()
@@ -55,24 +60,25 @@ def bom_effective_qty(name, qty):
         return qty * 1000
     return qty
 
-def safe_read_boomplain(file_obj):
+# --- LECTOR CON VALIDACIÓN (TRAÍDO DE App-Final) ---
+def leer_bom_excel(uploaded_file):
+    errores = []
     try:
-        file_obj.seek(0)
-        df_raw = pd.read_excel(file_obj, sheet_name=0, header=None, engine="openpyxl")
-        df = df_raw.iloc[:, :2].copy()
-        df.columns = ["Recurso", "Cantidad"]
-        df["Recurso"] = df["Recurso"].astype(str).str.strip()
-        df["Cantidad"] = pd.to_numeric(df["Cantidad"], errors="coerce").fillna(0)
-        df = df[~df["Recurso"].str.lower().isin(["basic monitors", "host monitors", "advanced monitors", "network component license", "includes gb applogs", "webpage views", "cantidades", "nan", "none", "recursos", "recursos (site24x7)", "monitor", "tipo de monitor"])]
-        df = df[~df["Recurso"].str.contains("comentario", case=False, na=False)]
-        df = df[df["Recurso"].notna() & (df["Recurso"] != "") & (df["Recurso"].str.lower() != "nan")]
-        return df
+        uploaded_file.seek(0)
+        df = pd.read_excel(uploaded_file, sheet_name=0, header=None, engine="openpyxl")
+        return df, "openpyxl"
     except Exception as e:
-        pass
-
+        errores.append(f"openpyxl: {type(e).__name__}: {str(e)}")
     try:
-        file_obj.seek(0)
-        data_bytes = file_obj.read()
+        uploaded_file.seek(0)
+        df = pd.read_excel(uploaded_file, sheet_name=0, header=None, engine="calamine")
+        return df, "calamine"
+    except Exception as e:
+        errores.append(f"calamine: {type(e).__name__}: {str(e)}")
+    # Fallback XML manual (para archivos corruptos como Boomplain_2_columns.xlsx)
+    try:
+        uploaded_file.seek(0)
+        data_bytes = uploaded_file.read()
         with zipfile.ZipFile(BytesIO(data_bytes)) as z:
             try:
                 ss_xml = z.read("xl/sharedStrings.xml")
@@ -106,18 +112,84 @@ def safe_read_boomplain(file_obj):
                         row_vals.append(val)
                     else:
                         row_vals.append(v)
-                if len(row_vals) >= 1:
-                    if len(row_vals) == 1:
-                        row_vals.append("")
-                    rows.append(row_vals[:2])
-        df = pd.DataFrame(rows, columns=["Recurso", "Cantidad"])
-        df["Recurso"] = df["Recurso"].astype(str).str.strip()
-        df = df[~df["Recurso"].str.lower().isin(["", "basic monitors", "host monitors", "advanced monitors", "network component license", "includes gb applogs", "webpage views", "cantidades", "nan"])]
-        df["Cantidad"] = pd.to_numeric(df["Cantidad"], errors="coerce").fillna(0)
-        return df
-    except Exception as e2:
-        st.error(f"No se pudo leer: {e2}")
-        raise e2
+                rows.append(row_vals)
+        df = pd.DataFrame(rows)
+        return df, "xml_manual"
+    except Exception as e:
+        errores.append(f"xml_manual: {type(e).__name__}: {str(e)}")
+
+    raise RuntimeError("No fue posible leer el Excel.\n\n" + "\n".join(errores))
+
+def procesar_bom_site24x7_con_validacion(df):
+    if df is None or df.empty:
+        raise ValueError("El archivo Excel está vacío.")
+    if df.shape[1] < 2:
+        raise ValueError("El BoM debe tener al menos dos columnas: Recurso y Cantidad.")
+
+    df = df.iloc[:, :2].copy()
+    df.columns = ["recurso", "cantidad"]
+    df["recurso"] = df["recurso"].astype("string").str.strip()
+
+    seccion_actual = None
+    registros = []
+    errores_validacion = []
+
+    for idx, row in df.iterrows():
+        recurso = row["recurso"]
+        cantidad = row["cantidad"]
+
+        if pd.isna(recurso) and pd.isna(cantidad):
+            continue
+
+        cantidad_texto = ""
+        if not pd.isna(cantidad):
+            cantidad_texto = str(cantidad).strip()
+
+        if not pd.isna(recurso) and cantidad_texto.lower() == "cantidades":
+            seccion_actual = str(recurso).strip()
+            continue
+
+        if str(recurso).strip().lower() in ["basic monitors", "host monitors", "advanced monitors", "network component license", "includes gb applogs", "webpage views", "recursos", "recursos (site24x7)"]:
+            continue
+
+        if pd.isna(recurso) or str(recurso).strip() == "" or str(recurso).strip().lower() == "nan":
+            continue
+
+        # --- VALIDACIÓN ESTRICTA DE CANTIDAD (DE App-Final) ---
+        if pd.isna(cantidad) or str(cantidad).strip() == "":
+            errores_validacion.append(f"❌ La cantidad del recurso '{recurso}' está vacía. Debe ingresar un número entero >=0. (Fila Excel {idx+1})")
+            continue
+
+        cantidad_texto = str(cantidad).strip()
+
+        # Validación: debe ser número entero
+        try:
+            cantidad_float = float(cantidad_texto.replace(",", "."))
+            if not cantidad_float.is_integer():
+                errores_validacion.append(f'❌ El Valor: **"{cantidad_texto}"**, no es un número entero válido para el Item **{recurso}**. (Fila {idx+1}) - Debe ser 0,1,2...')
+                continue
+            cantidad_num = int(cantidad_float)
+        except:
+            errores_validacion.append(f'❌ El Valor: \n**"{cantidad_texto}"**, no es un número entero válido para el Item: \n**"{recurso}"**\n. \nContiene letras o caracteres especiales en (Fila {idx+1}). \nEjemplos válidos: 0, 1, 10, 100.')
+            continue
+
+        if cantidad_num < 0:
+            errores_validacion.append(f"❌ La cantidad del recurso '{recurso}' es negativa ({cantidad_num}). Debe ser >=0. (Fila {idx+1})")
+            continue
+
+        registros.append({
+            "seccion": seccion_actual or "Sin sección",
+            "recurso": str(recurso).strip(),
+            "cantidad": cantidad_num,
+            "fila_excel": idx + 1  # Fila exacta del Excel (1-indexed) para que coincida con validación
+        })
+
+    if errores_validacion:
+        mensaje = "Se encontraron errores en la columna Cantidades:\n\n" + "\n".join(errores_validacion)
+        raise ValueError(mensaje)
+
+    resultado = pd.DataFrame(registros, columns=["seccion", "recurso", "cantidad", "fila_excel"])
+    return resultado
 
 def sum_by_category(bom_dict):
     totals = {"basic": 0, "host": 0, "advanced": 0, "network": 0, "rum_pageviews_k": 0, "applogs_gb": 0, "synthetic_runs_k": 0}
@@ -239,9 +311,9 @@ def evaluate_all_plans(totals):
         results[plan_name] = {"details": plan_result, "addon_cost": total_cost, "base_price": plan_data.get("base_price_usd", 0), "total_price": total_cost + plan_data.get("base_price_usd", 0), "included": included}
     return results
 
-# --- SIDEBAR ---
+# --- SIDEBAR (igual que App-Final-Completa) ---
 with st.sidebar:
-    st.header("1️⃣ Paso 1: \nPlan de licenciamiento")
+    st.header("1️⃣ Plan de licenciamiento")
     st.write("Selecciona el plan que deseas cotizar")
     plans = list(CONFIG["plans"].keys())
     selected_plan = st.selectbox("Plan", plans, index=1)
@@ -256,13 +328,13 @@ with st.sidebar:
     col_b.metric("Logs GB", inc.get("applogs_gb",0))
     st.metric("Synthetic K", inc.get("synthetic_runs_k",0))
     st.divider()
-    st.info("💡 Enterprise incluye Anomaly Detection, Event Correlation, NCM Compliance (AIOps)")
-    st.caption("Modelo 2026 USD - pago anual")
+    st.info("💡 El plan **Enterprise** incluye Anomaly Detection, Event Correlation, NCM Compliance (AIOps)")
+    st.caption("Modelo de licenciamiento 2026")
 
 st.title("🔍 Site24x7 - Calculadora de Licenciamiento")
-st.caption("Herramienta para cálculo rápido con Synthetic Runs, Logs y RUM corregidos | Versión Final Completa")
+st.caption("FInal Version Calculator V1.0 - ManageEngine LATAM")
 
-# --- TABS ---
+# --- TABS (igual que App-Final-Completa) ---
 tab1, tab2 = st.tabs(["2️⃣ Paso 2: Cargar BoM / Manual", "3️⃣ Paso 3: Resultados y Recomendación"])
 
 with tab1:
@@ -270,25 +342,46 @@ with tab1:
     
     with col1:
         st.subheader("Opción A: Subir BoM Excel 📁")
-        st.write("Sube el BoomPlain Final 2026 (soporta 2 o 3 columnas, con comentarios).")
-        uploaded = st.file_uploader("Excel BoM", type=["xlsx"], key="bom_upload")
-        bom_dict = None
-        totals = None
-        
+        st.write("Valida que la columna Cantidades no tenga letras o caracteres especiales. Solo muestra recursos con cantidad >0.")
+        uploaded = st.file_uploader("Excel BoM", type=["xlsx", "xls"], key="bom_upload")
+
         if uploaded:
-            df = safe_read_boomplain(uploaded)
-            st.success(f"✅ {len(df[df['Cantidad']>0])} Recursos detectados con cantidad diligenciada")
-            st.dataframe(df[df["Cantidad"]>0], use_container_width=True, height=300)
-            
-            bom_dict = dict(zip(df["Recurso"].astype(str), df["Cantidad"].astype(int)))
-            totals = sum_by_category(bom_dict)
-            st.session_state["totals"] = totals
-            st.session_state["bom_dict"] = bom_dict
+            try:
+                # VALIDACIÓN DE App-Final
+                df_raw, motor = leer_bom_excel(uploaded)
+                df_bom = procesar_bom_site24x7_con_validacion(df_raw)
+                
+                # COMPORTAMIENTO DE App-Final-Completa: mostrar solo con cantidad >0
+                df_bom_filtrado = df_bom[df_bom["cantidad"] > 0].copy()
+                
+                st.success(f"✅ BoM válido ({motor}): {len(df_bom_filtrado)} recursos con cantidad >0 - Sin caracteres inválidos")
+                
+                # CUADRO RESUMEN SOLO CON RECURSOS CON CANTIDADES CORRECTAS (Recurso, Cantidad, Fila Excel) - EN ORDEN DE FILA ORIGINAL
+                df_resumen = df_bom_filtrado[["fila_excel", "recurso", "cantidad"]].copy()
+                df_resumen.columns = [" # ", "Recurso", "Cantidad" ]
+                # Sin sort_values para mantener orden de fila del Excel como antes - ya viene en orden de lectura
+                
+                st.subheader("📋 Resumen - Recursos con cantidades diligenciadas correctamente")
+                # Mostrar con Fila Excel exacta para que coincida con validación (idx+1)
+                st.dataframe(df_resumen, use_container_width=True, height=350, hide_index=True)
+                
+                # Para cálculo, usar solo los >0 con cantidades correctas
+                bom_dict = dict(zip(df_resumen["Recurso"], df_resumen["Cantidad"]))
+                totals = sum_by_category(bom_dict)
+                st.session_state["totals"] = totals
+                st.session_state["bom_dict"] = bom_dict
+                
+            except ValueError as ve:
+                st.error(f"⚠️ Error de validación detectado:\n\n{str(ve)}")
+                st.warning("Corrige el Excel en las filas indicadas y vuelve a subirlo. No se calcularán totales hasta que corrijas los caracteres inválidos.")
+                st.stop()
+            except Exception as e:
+                st.error(f"Error leyendo Excel: {e}")
 
     with col2:
         st.subheader("Opción B: Entrada Manual Rápida ⌨️")
-        st.write("Si no tienes el archivo Excel, ingresa directamente los totales por categoría.")
-        st.caption("Ingresa los totales de recursos requeridos. Ejemplo: 750 = 750K, 5000 = 5M, 100 = 100GB")
+        st.write("Si no tienes Excel, ingresa totales por categoría directamente.")
+        
         basic_m = st.number_input("**Basic Monitors** (Web, Ping, SSL, Brand...)", 0, 100000, 0, key="basic_m")
         host_m = st.number_input("**Host Monitors** (Servers, EC2, Azure, GCP...)", 0, 100000, 0, key="host_m")
         adv_m = st.number_input("**Advanced Monitors** (APM, Transacciones...)", 0, 100000, 0, key="adv_m")
@@ -309,7 +402,6 @@ with tab1:
         st.divider()
         st.subheader("Totales detectados por categoría ✅ (con Logs y Runs)")
         
-        # Métricas en 7 columnas
         c1,c2,c3,c4,c5,c6,c7 = st.columns(7)
         c1.metric("Basic", totals["basic"], help="Website, SSL, Brand...")
         c2.metric("Host", totals["host"], help="Servers, EC2, Azure...")
@@ -319,7 +411,6 @@ with tab1:
         c6.metric("Logs GB", totals["applogs_gb"], help="AppLogs GB")
         c7.metric("Synthetic K", totals["synthetic_runs_k"], help="Synthetic runs en miles")
         
-        # Gráfico de barras
         st.subheader("📊 Gráfico - Distribución de recursos solicitados")
         chart_data = pd.DataFrame({
             "Categoria": ["Basic", "Host", "Advanced", "Network", "RUM K", "Logs GB", "Synthetic K"],
@@ -335,73 +426,63 @@ with tab2:
         results = evaluate_all_plans(totals)
         best_plan = min(results, key=lambda p: results[p]['total_price'])
         
-        # ============
-        #Aqui comienza la tabla 2
-
         st.subheader("Totales detectados por categoría ✅")
-                
-        # Métricas en 7 columnas
         c1,c2,c3,c4,c5,c6,c7 = st.columns(7)
-        c1.metric("Basic", totals["basic"], help="Website, SSL, Brand...")
-        c2.metric("Host", totals["host"], help="Servers, EC2, Azure...")
-        c3.metric("Advanced", totals["advanced"], help="APM, Transactions...")
-        c4.metric("Network", totals["network"], help="Devices, NCM...")
-        c5.metric("RUM K", totals["rum_pageviews_k"], help="Pageviews en miles")
-        c6.metric("Logs GB", totals["applogs_gb"], help="AppLogs GB")
-        c7.metric("Synthetic K", totals["synthetic_runs_k"], help="Synthetic runs en miles")
+        c1.metric("Basic", totals["basic"])
+        c2.metric("Host", totals["host"])
+        c3.metric("Advanced", totals["advanced"])
+        c4.metric("Network", totals["network"])
+        c5.metric("RUM K", totals["rum_pageviews_k"])
+        c6.metric("Logs GB", totals["applogs_gb"])
+        c7.metric("Synthetic K", totals["synthetic_runs_k"])
 
-        st.success(f"✅ **Recomendación automática:** {best_plan} - Total ${results[best_plan]['total_price']} USD/mes (Base ${results[best_plan]['base_price']} + Add-ons ${results[best_plan]['addon_cost']})")
-        st.info(f"Nota: Si necesitas AIOps (Anomaly Detection, Event Correlation), elige Enterprise aunque {best_plan} sea más barato.")
+        #st.success(f"✅ **Recomendación automática:** {best_plan} - Total ${results[best_plan]['total_price']} USD/mes (Base ${results[best_plan]['base_price']} + Add-ons ${results[best_plan]['addon_cost']})")
+        st.info(f"Nota: Si necesitas AIOps, elige Enterprise aunque {best_plan} sea más barato.")
         
         st.divider()
-        
         st.subheader(f"🔍 Detalle Add-ons para {selected_plan} (con Logs y Runs)")
         
         det = results[selected_plan]["details"]
         quote_rows=[]
         quote_rows.append({"Items & Description": f"{selected_plan} \n Plan", "Quantity": 1, "Unit Price": results[selected_plan]["base_price"], "Total Price": results[selected_plan]["base_price"]})
         
-        # Tabla detallada por categoría
         detail_data=[]
         for cat_label, key in [("Basic Monitors","basic"),("Host Monitors","host"),("Advanced Monitors","advanced"),("Network Components","network"),("RUM Pageviews","rum_pageviews_k"),("AppLogs","applogs_gb"),("Synthetic Runs","synthetic_runs_k")]:
             calc = det.get(key)
             if not calc:
                 continue
             if calc["deficit"]>0:
-                packs_str = "\n  ||  ".join([f"{p['qty']}x {p['size']}{p['unit']} (${p['price']}/pack)"# = ${p['total_price']}" 
-                for p in calc["packs"]])
-                detail_data.append({"Categoria": cat_label, "Requerido": totals.get(key,0), "Incluido": results[selected_plan]["included"].get(key,0), "Deficit": calc["deficit"], "Add-ons": packs_str, "Costo": f"${calc['cost']}"})
+                #packs_str = "\n  ||  ".join([f"{p['qty']}x {p['size']}{p['unit']} (${p['price']}/pack)" for p in calc["packs"]])
+                packs_str = "\n   ||   ".join([f"{p['qty']}x {p['size']}{p['unit']}" for p in calc["packs"]])#  (${p['price']}/pack)" 
+                detail_data.append({"Categoria": cat_label,"Cantidades incluidas en plan": results[selected_plan]["included"].get(key,0), "Requeridas": totals.get(key,0), "Deficit": calc["deficit"], "Add-ons necesarios": packs_str})#:, "Costo": f"${calc['cost']}"})
                 for p in calc["packs"]:
                     desc = f"Additional {p['eff_size']}{p['unit']} {cat_label}"
                     quote_rows.append({"Items & Description": desc, "Quantity": p["qty"], "Unit Price": p["price"], "Total Price": p["total_price"]})
             else:
-                detail_data.append({"Categoria": cat_label, "Requerido": totals.get(key,0), "Incluido": results[selected_plan]["included"].get(key,0), "Deficit": 0, "Add-ons": "✅ Cubierto", "Costo": "$0"})
+                detail_data.append({"Categoria": cat_label,"Cantidades incluidas en plan": results[selected_plan]["included"].get(key,0), "Requerido": totals.get(key,0), "Deficit": 0, "Add-ons necesarios": "✅ Cubierto", "Costo": "$0"})
         
         st.dataframe(pd.DataFrame(detail_data), use_container_width=True)
         
         st.divider()
-        st.subheader("📄 Tabla Quote Final - Items & Description ")
+        st.subheader("📄 Tabla Quote Final - Items & Description")
         st.write("Esta tabla es la que se envía a Sales")
         
         df_quote = pd.DataFrame(quote_rows)
-        # Calcular total
         total_quote = df_quote["Total Price"].sum()
         
         st.dataframe(df_quote, use_container_width=True, height=400)
+
+        st.markdown(f"### 📩 Opciones de descarga")
+        #st.markdown(f"### 💵 Total Estimado: **${total_quote} USD/mes** (pago anual)")
+        st.caption("Precios de lista USD sin impuestos.")
         
-        # Resumen final
-        st.markdown(f"### 💵 Total Estimado: **${total_quote} USD/mes** (pago anual)")
-        st.caption("Precios de lista USD sin impuestos. Precio final varía por país/partner.")
-        
-        # Descargas
         col_dl1, col_dl2 = st.columns(2)
         with col_dl1:
             csv = df_quote.to_csv(index=False).encode('utf-8')
             st.download_button("📥 Descargar CSV Quote (con Logs y Runs)", csv, "quote_site24x7_final_completa.csv", "text/csv", use_container_width=True)
         with col_dl2:
-            # CSV comparativa
             csv_comp = pd.DataFrame(detail_data).to_csv(index=False).encode('utf-8')
             st.download_button("📊 Descargar Detalle por Categoría", csv_comp, "detalle_categorias.csv", "text/csv", use_container_width=True)
 
 st.markdown("---")
-st.caption("Created by Diego Gonzalez 2026 - Technical Consultant ManageEngine FSO - Colombia 🇨🇴")
+st.caption("Created by Diego Gonzalez - LATAM Technical Presales Consultant - Site24x7 - All Rights Reserved - 2026 ©")
