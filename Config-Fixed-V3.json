@@ -1,0 +1,670 @@
+{
+  "plans": {
+    "Lite": {
+      "included": {
+        "basic": 5,
+        "host": 2,
+        "advanced": 0,
+        "network": 0,
+        "rum_pageviews_k": 0,
+        "applogs_gb": 0,
+        "synthetic_runs_k": 0
+      },
+      "addons": {
+        "basic": [
+          {
+            "size": 10,
+            "price": 10
+          }
+        ],
+        "host": [
+          {
+            "size": 10,
+            "price": 25
+          }
+        ],
+        "advanced": [
+          {
+            "size": 2,
+            "price": 15
+          }
+        ],
+        "network": [
+          {
+            "size": 10,
+            "price": 11
+          }
+        ],
+        "rum": [
+          {
+            "size": 500,
+            "price": 25,
+            "unit": "K"
+          }
+        ],
+        "applogs": [
+          {
+            "size": 10,
+            "price": 3
+          }
+        ],
+        "synthetic": [
+          {
+            "size": 10,
+            "price": 8
+          }
+        ]
+      },
+      "base_price_usd": 9
+    },
+    "Professional": {
+      "included": {
+        "basic": 20,
+        "host": 5,
+        "advanced": 1,
+        "network": 3,
+        "rum_pageviews_k": 100,
+        "applogs_gb": 4,
+        "synthetic_runs_k": 100
+      },
+      "addons": {
+        "basic": [
+          {
+            "size": 10,
+            "price": 10
+          },
+          {
+            "size": 50,
+            "price": 48
+          },
+          {
+            "size": 500,
+            "price": 450
+          },
+          {
+            "size": 1000,
+            "price": 850
+          },
+          {
+            "size": 5000,
+            "price": 4000
+          },
+          {
+            "size": 10000,
+            "price": 7500
+          },
+          {
+            "size": 25000,
+            "price": 17500
+          },
+          {
+            "size": 50000,
+            "price": 30000
+          },
+          {
+            "size": 100000,
+            "price": 50000
+          }
+        ],
+        "host": [
+          {
+            "size": 10,
+            "price": 25
+          },
+          {
+            "size": 50,
+            "price": 110
+          },
+          {
+            "size": 500,
+            "price": 1100
+          },
+          {
+            "size": 1000,
+            "price": 2100
+          },
+          {
+            "size": 5000,
+            "price": 10000
+          },
+          {
+            "size": 10000,
+            "price": 17500
+          },
+          {
+            "size": 25000,
+            "price": 37500
+          },
+          {
+            "size": 50000,
+            "price": 68750
+          },
+          {
+            "size": 100000,
+            "price": 125000
+          }
+        ],
+        "advanced": [
+          {
+            "size": 2,
+            "price": 15
+          },
+          {
+            "size": 5,
+            "price": 35
+          },
+          {
+            "size": 25,
+            "price": 160
+          },
+          {
+            "size": 100,
+            "price": 600
+          },
+          {
+            "size": 500,
+            "price": 2750
+          },
+          {
+            "size": 1000,
+            "price": 5250
+          },
+          {
+            "size": 5000,
+            "price": 23250
+          },
+          {
+            "size": 10000,
+            "price": 43500
+          },
+          {
+            "size": 25000,
+            "price": 100000
+          },
+          {
+            "size": 50000,
+            "price": 185000
+          }
+        ],
+        "network": [
+          {
+            "size": 10,
+            "price": 11
+          },
+          {
+            "size": 25,
+            "price": 28
+          },
+          {
+            "size": 50,
+            "price": 55
+          },
+          {
+            "size": 100,
+            "price": 105
+          },
+          {
+            "size": 250,
+            "price": 248
+          },
+          {
+            "size": 500,
+            "price": 468
+          }
+        ],
+        "rum": [
+          {
+            "size": 500,
+            "price": 25,
+            "unit": "K"
+          },
+          {
+            "size": 5,
+            "price": 150,
+            "unit": "M"
+          },
+          {
+            "size": 10,
+            "price": 300,
+            "unit": "M"
+          },
+          {
+            "size": 50,
+            "price": 1400,
+            "unit": "M"
+          },
+          {
+            "size": 100,
+            "price": 2000,
+            "unit": "M"
+          },
+          {
+            "size": 1,
+            "price": 15000,
+            "unit": "B"
+          }
+        ],
+        "applogs": [
+          {
+            "size": 10,
+            "price": 3,
+            "unit": "GB"
+          },
+          {
+            "size": 100,
+            "price": 25,
+            "unit": "GB"
+          },
+          {
+            "size": 1,
+            "price": 195,
+            "unit": "TB"
+          }
+        ],
+        "synthetic": [
+          {
+            "size": 10,
+            "price": 8,
+            "unit": "K"
+          },
+          {
+            "size": 100,
+            "price": 72,
+            "unit": "K"
+          },
+          {
+            "size": 1,
+            "price": 680,
+            "unit": "M"
+          },
+          {
+            "size": 10,
+            "price": 5600,
+            "unit": "M"
+          },
+          {
+            "size": 50,
+            "price": 24000,
+            "unit": "M"
+          },
+          {
+            "size": 100,
+            "price": 44000,
+            "unit": "M"
+          },
+          {
+            "size": 1,
+            "price": 400000,
+            "unit": "B"
+          }
+        ]
+      },
+      "base_price_usd": 42
+    },
+    "Enterprise": {
+      "included": {
+        "basic": 50,
+        "host": 40,
+        "advanced": 10,
+        "network": 18,
+        "applogs_gb": 40,
+        "rum_pageviews_k": 5000,
+        "synthetic_runs_k": 1000
+      },
+      "addons": {
+        "basic": [
+          {
+            "size": 10,
+            "price": 16
+          },
+          {
+            "size": 50,
+            "price": 76
+          },
+          {
+            "size": 500,
+            "price": 720
+          },
+          {
+            "size": 1000,
+            "price": 1360
+          },
+          {
+            "size": 5000,
+            "price": 6000
+          },
+          {
+            "size": 10000,
+            "price": 11250
+          },
+          {
+            "size": 25000,
+            "price": 26250
+          },
+          {
+            "size": 50000,
+            "price": 36000
+          },
+          {
+            "size": 100000,
+            "price": 60000
+          }
+        ],
+        "host": [
+          {
+            "size": 10,
+            "price": 40
+          },
+          {
+            "size": 50,
+            "price": 190
+          },
+          {
+            "size": 500,
+            "price": 1800
+          },
+          {
+            "size": 1000,
+            "price": 3400
+          },
+          {
+            "size": 5000,
+            "price": 15000
+          },
+          {
+            "size": 10000,
+            "price": 28125
+          },
+          {
+            "size": 25000,
+            "price": 65625
+          },
+          {
+            "size": 50000,
+            "price": 96000
+          },
+          {
+            "size": 100000,
+            "price": 175000
+          }
+        ],
+        "advanced": [
+          {
+            "size": 2,
+            "price": 28
+          },
+          {
+            "size": 5,
+            "price": 66
+          },
+          {
+            "size": 25,
+            "price": 315
+          },
+          {
+            "size": 100,
+            "price": 1190
+          },
+          {
+            "size": 500,
+            "price": 5600
+          },
+          {
+            "size": 1000,
+            "price": 10500
+          },
+          {
+            "size": 5000,
+            "price": 42000
+          },
+          {
+            "size": 10000,
+            "price": 69600
+          },
+          {
+            "size": 25000,
+            "price": 130000
+          },
+          {
+            "size": 50000,
+            "price": 250000
+          }
+        ],
+        "network": [
+          {
+            "size": 10,
+            "price": 15
+          },
+          {
+            "size": 25,
+            "price": 36
+          },
+          {
+            "size": 50,
+            "price": 72
+          },
+          {
+            "size": 100,
+            "price": 143
+          },
+          {
+            "size": 250,
+            "price": 340
+          },
+          {
+            "size": 500,
+            "price": 645
+          },
+          {
+            "size": 1000,
+            "price": 1215
+          },
+          {
+            "size": 2000,
+            "price": 2000
+          },
+          {
+            "size": 5000,
+            "price": 4650
+          },
+          {
+            "size": 10000,
+            "price": 8580
+          }
+        ],
+        "rum": [
+          {
+            "size": 500,
+            "price": 30,
+            "unit": "K"
+          },
+          {
+            "size": 5,
+            "price": 180,
+            "unit": "M"
+          },
+          {
+            "size": 10,
+            "price": 360,
+            "unit": "M"
+          },
+          {
+            "size": 50,
+            "price": 1680,
+            "unit": "M"
+          },
+          {
+            "size": 100,
+            "price": 2400,
+            "unit": "M"
+          },
+          {
+            "size": 1,
+            "price": 18000,
+            "unit": "B"
+          }
+        ],
+        "applogs": [
+          {
+            "size": 10,
+            "price": 4,
+            "unit": "GB"
+          },
+          {
+            "size": 100,
+            "price": 30,
+            "unit": "GB"
+          },
+          {
+            "size": 1,
+            "price": 240,
+            "unit": "TB"
+          }
+        ],
+        "synthetic": [
+          {
+            "size": 10,
+            "price": 10,
+            "unit": "K"
+          },
+          {
+            "size": 100,
+            "price": 117,
+            "unit": "K"
+          },
+          {
+            "size": 1,
+            "price": 1105,
+            "unit": "M"
+          },
+          {
+            "size": 10,
+            "price": 9100,
+            "unit": "M"
+          },
+          {
+            "size": 50,
+            "price": 36000,
+            "unit": "M"
+          },
+          {
+            "size": 100,
+            "price": 66000,
+            "unit": "M"
+          },
+          {
+            "size": 1,
+            "price": 500000,
+            "unit": "B"
+          }
+        ]
+      },
+      "base_price_usd": 625
+    }
+  },
+  "mapping_bom_to_category": {
+    "Website (HTTP/HTTPS)": "basic",
+    "WebSocket ": "basic",
+    "DNS Server, Ping, FTP Server, NTP Server, SMTP Server": "basic",
+    "SSL/TLS Certificate, Domain Expiry": "basic",
+    "SOAP Web Service, REST API, REST API Transaction": "basic",
+    "Port (Custom Protocol), POP Server": "basic",
+    "Real-time Blocklist Check": "basic",
+    "Brand Reputation": "basic",
+    "File Upload": "basic",
+    "gRPC (Google Remote Procedure Call)": "basic",
+    "Windows Server Backup": "basic",
+    "Windows Updates": "basic",
+    "Hadoop": "basic",
+    "Cron and heartbeat": "basic",
+    "Kubernetes Pods": "basic",
+    "Kubernetes Cluster": "basic",
+    "SMART disk": "basic",
+    "ZooKeeper": "basic",
+    "StatsD Metrics": "basic",
+    "Plugin Integrations": "basic",
+    "Nutanix Storage Container": "basic",
+    "VMware Resource Pool": "basic",
+    "VMware Datastore": "basic",
+    "VMware Snapshot": "basic",
+    "Azure Monitoring": "basic",
+    "Backup Monitoring": "basic",
+    "Different AWS EC2 instance services": "basic",
+    "Windows, Linux, IBM AIX, Solaris, FreeBSD, and macOS": "host",
+    "Docker Hosts": "host",
+    "Host Containers": "host",
+    "Kubernetes Nods": "host",
+    "Podman Instances": "host",
+    "VMware vCenter": "host",
+    "VMware vCenter Sessions": "host",
+    "VMware VM Instance": "host",
+    "VMware ESX/ESXi Host": "host",
+    "VMware ESX/ESXi Hardware": "host",
+    "VMware Virtual Machine": "host",
+    "VMware Cluster": "host",
+    "Nutanix Cluster": "host",
+    "Nutanix Host": "host",
+    "Nutanix VM": "host",
+    "VMware NSX-T Manager": "host",
+    "VMware NSX-T Gateway": "host",
+    "VMware NSX-T node": "host",
+    "XenServer Host": "host",
+    "XenServer VM": "host",
+    "EC2 Instance AWS": "host",
+    "Azure VMs": "host",
+    "GCP Compute": "host",
+    "Web Transaction (Browser)": "advanced",
+    "Web Transaction (Browser) - Selenium WebDriver": "advanced",
+    "FTP Transfer": "advanced",
+    "Mail Delivery": "advanced",
+    "Web Page Speed (Browser)": "advanced",
+    "Website Defacement": "advanced",
+    "APM-Insight-Instance": "advanced",
+    "Microsoft BizTalk Monitoring": "advanced",
+    "Microsoft SharePoint Monitoring": "advanced",
+    "Microsoft Office 365 Monitoring": "advanced",
+    "Microsoft Active Directory (AD) Monitoring": "advanced",
+    "Microsoft Exchange Monitoring": "advanced",
+    "Microsoft Hyper-V Monitoring": "advanced",
+    "Microsoft SQL Monitoring": "advanced",
+    "Microsoft Failover Cluster Monitoring": "advanced",
+    "VMware Horizon": "advanced",
+    "ISP Latency": "advanced",
+    "MySQL": "advanced",
+    "Microsoft SQL": "advanced",
+    "MySQL NDB Clusters": "advanced",
+    "PostgreSQL": "advanced",
+    "Oracle": "advanced",
+    "Oracle RAC Clusters": "advanced",
+    "SLO": "advanced",
+    "Network device": "network",
+    "Additional network monitoring interfaces": "network",
+    "NetFlow interface": "network",
+    "NCM": "network",
+    "Cisco Meraki Organization": "network",
+    "Cisco Meraki Device": "network",
+    "VoIP ": "network",
+    "WAN RTT ": "network",
+    "IPAM: Subnet": "network",
+    "IPAM: Additional used IP addresses": "network",
+    "Cisco ACI": "network",
+    "Wireless LAN controllers (WLCs)": "network",
+    "Access points": "network",
+    "VMware VeloCloud Edge device": "network",
+    "Logs pushed per month 10GB": "applogs_gb",
+    "Logs pushed per month 100GB": "applogs_gb",
+    "Logs pushed per month 1TB": "applogs_gb",
+    "Log Retention period 7 days": "applogs_gb",
+    "Log Retention period 15 days": "applogs_gb",
+    "Log Retention period 30 days": "applogs_gb",
+    "Pageviews per month k (Miles)": "rum_pageviews_k",
+    "Pageviews per month M (Millones)": "rum_pageviews_k",
+    "Synthetic runs per month k (Miles)": "synthetic_runs_k",
+    "Synthetic runs per month M (Millones)": "synthetic_runs_k",
+    "Pageviews per month 500k": "rum_pageviews_k",
+    "Pageviews per month 10M": "rum_pageviews_k",
+    "WebPage Views": "rum_pageviews_k",
+    "Pageviews per month 10M ": "rum_pageviews_k",
+    "Includes GB AppLogs": "applogs_gb"
+  }
+}
