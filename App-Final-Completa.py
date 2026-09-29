@@ -341,8 +341,8 @@ with tab1:
     col1, col2 = st.columns([1,1], gap="large")
     
     with col1:
-        st.subheader("Opción A: Subir BoM Excel 📁")
-        st.write("Valida que la columna Cantidades no tenga letras o caracteres especiales. Solo muestra recursos con cantidad >0.")
+        st.subheader("Opción A: Subir (BoM) 📁")
+        st.write("Carga el archivo Excel con las cantidades de recursos diligenciados.")
         uploaded = st.file_uploader("Excel BoM", type=["xlsx", "xls"], key="bom_upload")
 
         if uploaded:
@@ -354,14 +354,14 @@ with tab1:
                 # COMPORTAMIENTO DE App-Final-Completa: mostrar solo con cantidad >0
                 df_bom_filtrado = df_bom[df_bom["cantidad"] > 0].copy()
                 
-                st.success(f"✅ BoM válido ({motor}): {len(df_bom_filtrado)} recursos con cantidad >0 - Sin caracteres inválidos")
+                st.success(f"✅ Archivo BoM válido: {len(df_bom_filtrado)} recursos con cantidades diligenciadas correctamente.")
                 
                 # CUADRO RESUMEN SOLO CON RECURSOS CON CANTIDADES CORRECTAS (Recurso, Cantidad, Fila Excel) - EN ORDEN DE FILA ORIGINAL
                 df_resumen = df_bom_filtrado[["fila_excel", "recurso", "cantidad"]].copy()
                 df_resumen.columns = [" # ", "Recurso", "Cantidad" ]
                 # Sin sort_values para mantener orden de fila del Excel como antes - ya viene en orden de lectura
                 
-                st.subheader("📋 Resumen - Recursos con cantidades diligenciadas correctamente")
+                st.subheader("📋 Resumen - Recursos con cantidades detectadas")
                 # Mostrar con Fila Excel exacta para que coincida con validación (idx+1)
                 st.dataframe(df_resumen, use_container_width=True, height=350, hide_index=True)
                 
@@ -379,7 +379,7 @@ with tab1:
                 st.error(f"Error leyendo Excel: {e}")
 
     with col2:
-        st.subheader("Opción B: Entrada Manual Rápida ⌨️")
+        st.subheader("Opción B: Entrada de cantidades (Manual)  ⌨️")
         st.write("Si no tienes Excel, ingresa totales por categoría directamente.")
         
         basic_m = st.number_input("**Basic Monitors** (Web, Ping, SSL, Brand...)", 0, 100000, 0, key="basic_m")
@@ -400,7 +400,7 @@ with tab1:
     if "totals" in st.session_state:
         totals = st.session_state["totals"]
         st.divider()
-        st.subheader("Totales detectados por categoría ✅ (con Logs y Runs)")
+        st.subheader("Totales detectados (categoría ✅)")
         
         c1,c2,c3,c4,c5,c6,c7 = st.columns(7)
         c1.metric("Basic", totals["basic"], help="Website, SSL, Brand...")
@@ -411,7 +411,7 @@ with tab1:
         c6.metric("Logs GB", totals["applogs_gb"], help="AppLogs GB")
         c7.metric("Synthetic K", totals["synthetic_runs_k"], help="Synthetic runs en miles")
         
-        st.subheader("📊 Gráfico - Distribución de recursos solicitados")
+        st.subheader("📊 Distribución de recursos solicitados")
         chart_data = pd.DataFrame({
             "Categoria": ["Basic", "Host", "Advanced", "Network", "RUM K", "Logs GB", "Synthetic K"],
             "Requerido": [totals["basic"], totals["host"], totals["advanced"], totals["network"], totals["rum_pageviews_k"], totals["applogs_gb"], totals["synthetic_runs_k"]]
@@ -440,7 +440,7 @@ with tab2:
         st.info(f"Nota: Si necesitas AIOps, elige Enterprise aunque {best_plan} sea más barato.")
         
         st.divider()
-        st.subheader(f"🔍 Detalle Add-ons para {selected_plan} (con Logs y Runs)")
+        st.subheader(f"🔍 Detalle Add-ons para el plan **{selected_plan}**.")
         
         det = results[selected_plan]["details"]
         quote_rows=[]
@@ -459,12 +459,13 @@ with tab2:
                     desc = f"Additional {p['eff_size']}{p['unit']} {cat_label}"
                     quote_rows.append({"Items & Description": desc, "Quantity": p["qty"], "Unit Price": p["price"], "Total Price": p["total_price"]})
             else:
-                detail_data.append({"Categoria": cat_label,"Cantidades incluidas en plan": results[selected_plan]["included"].get(key,0), "Requerido": totals.get(key,0), "Deficit": 0, "Add-ons necesarios": "✅ Cubierto", "Costo": "$0"})
+                #detail_data.append({"Categoria": cat_label,"Cantidades incluidas en plan": results[selected_plan]["included"].get(key,0), "Requerido": totals.get(key,0), "Deficit": 0, "Add-ons necesarios": "✅ Cubierto", "Costo": "$0"})
+                detail_data.append({"Categoria": cat_label,"Cantidades incluidas en plan": results[selected_plan]["included"].get(key,0), "Deficit": 0, "Add-ons necesarios": "✅ Cubierto"})
         
         st.dataframe(pd.DataFrame(detail_data), use_container_width=True)
         
         st.divider()
-        st.subheader("📄 Tabla Quote Final - Items & Description")
+        st.subheader("📄 Tabla Quote Final")
         st.write("Esta tabla es la que se envía a Sales")
         
         df_quote = pd.DataFrame(quote_rows)
@@ -485,4 +486,4 @@ with tab2:
             st.download_button("📊 Descargar Detalle por Categoría", csv_comp, "detalle_categorias.csv", "text/csv", use_container_width=True)
 
 st.markdown("---")
-st.caption("Created by Diego Gonzalez - LATAM Technical Presales Consultant - Site24x7 - All Rights Reserved - 2026 ©")
+st.caption("Created by Diego Gonzalez - LATAM Technical Presales Consultant- Site24x7 - All Rights Reserved - 2026 ©")
