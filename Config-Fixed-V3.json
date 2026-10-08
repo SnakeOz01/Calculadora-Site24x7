@@ -65,7 +65,7 @@
         "network": 3,
         "rum_pageviews_k": 100,
         "applogs_gb": 4,
-        "synthetic_runs_k": 100
+        "synthetic_runs_k": 10
       },
       "addons": {
         "basic": [
@@ -306,10 +306,10 @@
         "basic": 50,
         "host": 40,
         "advanced": 10,
-        "network": 18,
+        "network": 60,
         "applogs_gb": 40,
         "rum_pageviews_k": 5000,
-        "synthetic_runs_k": 1000
+        "synthetic_runs_k": 50
       },
       "addons": {
         "basic": [
