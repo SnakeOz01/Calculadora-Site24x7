@@ -648,7 +648,7 @@
     "Microsoft SQL": "advanced",
     "MySQL NDB Clusters": "advanced",
     "PostgreSQL": "advanced",
-    "Oracle": "advanced",
+    "Oracle DB": "advanced",
     "Oracle RAC Clusters": "advanced",
     "SLO": "advanced",
     "Network device": "network",
