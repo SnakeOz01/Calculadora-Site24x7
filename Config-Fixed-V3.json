@@ -65,7 +65,7 @@
         "network": 3,
         "rum_pageviews_k": 100,
         "applogs_gb": 4,
-        "synthetic_runs_k": 10
+        "synthetic_runs_k": 100
       },
       "addons": {
         "basic": [
@@ -254,11 +254,6 @@
             "size": 100,
             "price": 25,
             "unit": "GB"
-          },
-          {
-            "size": 1,
-            "price": 195,
-            "unit": "TB"
           }
         ],
         "synthetic": [
@@ -306,10 +301,10 @@
         "basic": 50,
         "host": 40,
         "advanced": 10,
-        "network": 60,
+        "network": 18,
         "applogs_gb": 40,
         "rum_pageviews_k": 5000,
-        "synthetic_runs_k": 50
+        "synthetic_runs_k": 1000
       },
       "addons": {
         "basic": [
@@ -514,11 +509,6 @@
             "size": 100,
             "price": 30,
             "unit": "GB"
-          },
-          {
-            "size": 1,
-            "price": 240,
-            "unit": "TB"
           }
         ],
         "synthetic": [
