@@ -142,8 +142,20 @@ def procesar_bom_site24x7_con_validacion(df):
             continue
 
         cantidad_texto = ""
-        if not pd.isna(cantidad):
+        if not pd.isna(cantidad):   
             cantidad_texto = str(cantidad).strip()
+
+       #if not pd.isna(recurso) and cantidad_texto.lower() == "cantidades":
+       #    seccion_actual = str(recurso).strip()
+       #    continue
+
+       #if str(recurso).strip().lower() in ["basic monitors", "host monitors", "advanced monitors", "network component license", "includes gb applogs", "webpage views", "recursos", "recursos (site24x7)"]:
+       #    continue
+
+               # FIX: Saltar fila de encabezado de la plantilla nueva: Recurso | Cantidad | Comentario
+        # Sin esto intenta convertir "Cantidad" en número y falla en Fila 1
+        if str(recurso).strip().lower() in ["recurso", "recursos", "recursos (site24x7)"] and cantidad_texto.lower() in ["cantidad", "cantidades", "quantity"]:
+            continue
 
         if not pd.isna(recurso) and cantidad_texto.lower() == "cantidades":
             seccion_actual = str(recurso).strip()
@@ -338,6 +350,55 @@ st.caption("FInal Version Calculator V1.0 - ManageEngine LATAM")
 tab1, tab2 = st.tabs(["2️⃣ Paso 2: Cargar BoM / Manual", "3️⃣ Paso 3: Resultados y Recomendación"])
 
 with tab1:
+
+    # --- DESCARGAR PLANTILLA BoM ---
+    st.markdown("### 📥 ¿No tienes el formato BoM?")
+    st.write("Descarga la plantilla, diligencia solo la columna **Cantidad** y súbela en la Opción A.")
+
+    # Generar plantilla al vuelo desde el CONFIG
+    orden_secciones = [
+        ("Basic Monitors", "basic"),
+        ("Host Monitors", "host"),
+        ("Advanced Monitors", "advanced"),
+        ("Network Component License", "network"),
+        ("Includes GB AppLogs", "applogs_gb"),
+        ("Webpage Views", "rum_pageviews_k"),
+        ("Synthetic Runs", "synthetic_runs_k"),
+    ]
+    mapping = CONFIG.get("mapping_bom_to_category", {})
+    por_cat = {cat: [] for _, cat in orden_secciones}
+    for recurso, cat in mapping.items():
+        if cat in por_cat:
+            por_cat[cat].append(recurso)
+
+    filas_plantilla = []
+    for titulo, cat in orden_secciones:
+        filas_plantilla.append([titulo, "Cantidades", ""])
+        for recurso in por_cat[cat]:
+            filas_plantilla.append([recurso, 0, ""])
+
+    df_plantilla = pd.DataFrame(filas_plantilla, columns=["Recurso", "Cantidad", " "])
+    buffer_plantilla = BytesIO()
+    with pd.ExcelWriter(buffer_plantilla, engine="openpyxl") as writer:
+        df_plantilla.to_excel(writer, index=False, sheet_name="BoM Site24x7")
+        ws_p = writer.sheets["BoM Site24x7"]
+        ws_p.column_dimensions["A"].width = 55
+        ws_p.column_dimensions["B"].width = 14
+        ws_p.column_dimensions["C"].width = 14
+
+    st.download_button(
+        "📥 Descargar Plantilla BoM (Excel)",
+        buffer_plantilla.getvalue(),
+        "Plantilla_BoM_Site24x7.xlsx",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        use_container_width=False
+    )
+    st.divider()
+  
+
+    # --- fin descarga de plantilla ---
+
+
     col1, col2 = st.columns([1,1], gap="large")
     
     with col1:
@@ -365,7 +426,7 @@ with tab1:
                 # Mostrar con Fila Excel exacta para que coincida con validación (idx+1)
                 st.dataframe(df_resumen, use_container_width=True, height=350, hide_index=True)
                 
-                # Para cálculo, usar solo los >0 con cantidades correctas
+                # Para cálculo, usar solo los >0 con cantidades correctas 
                 bom_dict = dict(zip(df_resumen["Recurso"], df_resumen["Cantidad"]))
                 totals = sum_by_category(bom_dict)
                 st.session_state["totals"] = totals
@@ -444,7 +505,7 @@ with tab2:
         
         det = results[selected_plan]["details"]
         quote_rows=[]
-        quote_rows.append({"Items & Description": f"{selected_plan} \n Plan", "Quantity": 1, "Unit Price": results[selected_plan]["base_price"], "Total Price": results[selected_plan]["base_price"]})
+        quote_rows.append({"Items & Description": f"{selected_plan} Plan", "Quantities": 1, "Unit Price": results[selected_plan]["base_price"], "Total Price": results[selected_plan]["base_price"]})
         
         detail_data=[]
         for cat_label, key in [("Basic Monitors","basic"),("Host Monitors","host"),("Advanced Monitors","advanced"),("Network Components","network"),("RUM Pageviews","rum_pageviews_k"),("AppLogs","applogs_gb"),("Synthetic Runs","synthetic_runs_k")]:
@@ -453,37 +514,93 @@ with tab2:
                 continue
             if calc["deficit"]>0:
                 #packs_str = "\n  ||  ".join([f"{p['qty']}x {p['size']}{p['unit']} (${p['price']}/pack)" for p in calc["packs"]])
-                packs_str = "   ||   ".join([f"{p['qty']}x {p['size']}{p['unit']}" for p in calc["packs"]])#  (${p['price']}/pack)" 
+                packs_str = "   ||   ".join([f"{p['qty']} pck x {p['size']}{p['unit']}" for p in calc["packs"]])#  (${p['price']}/pack)" 
                 detail_data.append({"Categoria": cat_label,"Cantidades incluidas en plan": results[selected_plan]["included"].get(key,0), "Requeridas": totals.get(key,0), "Deficit": calc["deficit"], "Add-ons necesarios": packs_str})#:, "Costo": f"${calc['cost']}"})
                 for p in calc["packs"]:
                     desc = f"Additional {p['eff_size']}{p['unit']} {cat_label}"
-                    quote_rows.append({"Items & Description": desc, "Quantity": p["qty"], "Unit Price": p["price"], "Total Price": p["total_price"]})
+                    quote_rows.append({"Items & Description": desc, "Quantities": p["qty"], "Unit Price": p["price"], "Total Price": p["total_price"]})
             else:
                 #detail_data.append({"Categoria": cat_label,"Cantidades incluidas en plan": results[selected_plan]["included"].get(key,0), "Requerido": totals.get(key,0), "Deficit": 0, "Add-ons necesarios": "✅ Cubierto", "Costo": "$0"})
                 detail_data.append({"Categoria": cat_label,"Cantidades incluidas en plan": results[selected_plan]["included"].get(key,0), "Deficit": 0, "Add-ons necesarios": "✅ Cubierto"})
         
-        st.dataframe(pd.DataFrame(detail_data), use_container_width=True)
+        #st.dataframe(pd.DataFrame(detail_data), use_container_width=True)
+        df_detail = pd.DataFrame(detail_data)
+        df_detail.index = range(1, len(df_detail) + 1)
+        st.dataframe(df_detail, use_container_width=True)
         
         st.divider()
         st.subheader("📄 Tabla Quote Final")
         st.write("Esta tabla es la que se envía a Sales")
         
+        #df_quote = pd.DataFrame(quote_rows)
+        #total_quote = df_quote["Total Price"].sum()
+        #
+        #st.dataframe(df_quote, use_container_width=True, height=400)
+
         df_quote = pd.DataFrame(quote_rows)
+        # Que la primera fila después de los encabezados sea 1, no 0
+        df_quote.index = range(1, len(df_quote) + 1)
         total_quote = df_quote["Total Price"].sum()
-        
+
         st.dataframe(df_quote, use_container_width=True, height=400)
 
-        st.markdown(f"### 📩 Opciones de descarga")
-        #st.markdown(f"### 💵 Total Estimado: **${total_quote} USD/mes** (pago anual)")
-        st.caption("Precios de lista USD sin impuestos.")
+        st.markdown(f"📩 Opciones de descarga")
+
         
+        #col_dl1, col_dl2 = st.columns(2)
+        #with col_dl1:
+        #    csv = df_quote.to_csv(index=False).encode('utf-8')
+        #    st.download_button("📥 Descargar Quote", csv, "quote_site24x7.csv", "text/csv", use_container_width=True)
+        #with col_dl2:
+        #    csv_comp = pd.DataFrame(detail_data).to_csv(index=False).encode('utf-8')
+        #    st.download_button("📊 Descargar Detalle", csv_comp, "detalle_categorias.csv", "text/csv", use_container_width=True)
+
         col_dl1, col_dl2 = st.columns(2)
+
         with col_dl1:
-            csv = df_quote.to_csv(index=False).encode('utf-8')
-            st.download_button("📥 Descargar CSV Quote (con Logs y Runs)", csv, "quote_site24x7_final_completa.csv", "text/csv", use_container_width=True)
+            # QUOTE - Solo #, Items & Description y Quantity como pediste
+            df_quote_export = pd.DataFrame({
+                "#": range(1, len(df_quote) + 1),
+                "Items & Description": df_quote["Items & Description"].astype(str).str.replace("\n", " ", regex=False).str.strip(),
+                "Quantities": df_quote["Quantities"]
+            })
+            buffer_quote = BytesIO()
+            with pd.ExcelWriter(buffer_quote, engine="openpyxl") as writer:
+                df_quote_export.to_excel(writer, index=False, sheet_name="Quote")
+                ws = writer.sheets["Quote"]
+                ws.column_dimensions["A"].width = 6
+                ws.column_dimensions["B"].width = 45
+                ws.column_dimensions["C"].width = 12
+            st.download_button(
+                "📥 Descargar Quote",
+                buffer_quote.getvalue(),
+                "quote_site24x7.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True
+            )
+
         with col_dl2:
-            csv_comp = pd.DataFrame(detail_data).to_csv(index=False).encode('utf-8')
-            st.download_button("📊 Descargar Detalle por Categoría", csv_comp, "detalle_categorias.csv", "text/csv", use_container_width=True)
+            # DETALLE - También en xlsx para que no se pegue todo en columna A
+            df_detail_export = pd.DataFrame(detail_data).copy()
+            df_detail_export.insert(0, "#", range(1, len(df_detail_export) + 1))
+            # Quita el .0 de Requeridas: 1234.0 -> 1234
+            if "Requeridas" in df_detail_export.columns:
+                df_detail_export["Requeridas"] = df_detail_export["Requeridas"].fillna(0).astype(int)
+
+            buffer_detalle = BytesIO()
+            with pd.ExcelWriter(buffer_detalle, engine="openpyxl") as writer:
+                df_detail_export.to_excel(writer, index=False, sheet_name="Detalle")
+                ws2 = writer.sheets["Detalle"]
+                ws2.column_dimensions["A"].width = 6
+                ws2.column_dimensions["B"].width = 22
+                ws2.column_dimensions["F"].width = 55
+            st.download_button(
+                "📊 Descargar Detalle",
+                buffer_detalle.getvalue(),
+                "detalle_categorias.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True
+            )
 
 st.markdown("---")
 st.caption("Created by Diego Gonzalez - LATAM Technical Presales Consultant- Site24x7 - All Rights Reserved - 2026 ©")
