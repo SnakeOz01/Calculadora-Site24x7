@@ -214,29 +214,29 @@
         ],
         "rum": [
           {
-            "size": 500,
-            "price": 25,
-            "unit": "K"
+              "size": 500,
+              "price": 30,
+              "unit": "K"
           },
           {
-            "size": 5,
-            "price": 150,
-            "unit": "M"
+              "size": 5000,
+              "price": 180,
+              "unit": "K"
           },
           {
-            "size": 10,
-            "price": 300,
-            "unit": "M"
+              "size": 10000,
+              "price": 360,
+              "unit": "K"
           },
           {
-            "size": 50,
-            "price": 1400,
-            "unit": "M"
+              "size": 50000,
+              "price": 1680,
+              "unit": "K"
           },
           {
-            "size": 100,
-            "price": 2000,
-            "unit": "M"
+              "size": 100000,
+              "price": 2400,
+              "unit": "K"
           },
           {
             "size": 1,
@@ -475,29 +475,29 @@
         ],
         "rum": [
           {
-            "size": 500,
-            "price": 30,
-            "unit": "K"
+              "size": 500,
+              "price": 30,
+              "unit": "K"
           },
           {
-            "size": 5,
-            "price": 180,
-            "unit": "M"
+              "size": 5000,
+              "price": 180,
+              "unit": "K"
           },
           {
-            "size": 10,
-            "price": 360,
-            "unit": "M"
+              "size": 10000,
+              "price": 360,
+              "unit": "K"
           },
           {
-            "size": 50,
-            "price": 1680,
-            "unit": "M"
+              "size": 50000,
+              "price": 1680,
+              "unit": "K"
           },
           {
-            "size": 100,
-            "price": 2400,
-            "unit": "M"
+              "size": 100000,
+              "price": 2400,
+              "unit": "K"
           },
           {
             "size": 1,
