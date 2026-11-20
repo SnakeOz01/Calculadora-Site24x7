@@ -671,14 +671,9 @@
     "Log Retention period 7 days": "applogs_gb",
     "Log Retention period 15 days": "applogs_gb",
     "Log Retention period 30 days": "applogs_gb",
-    "Pageviews per month k (Miles)": "rum_pageviews_k",
-    "Pageviews per month M (Millones)": "rum_pageviews_k",
     "Synthetic runs per month k (Miles)": "synthetic_runs_k",
     "Synthetic runs per month M (Millones)": "synthetic_runs_k",
     "Pageviews per month 500k": "rum_pageviews_k",
-    "Pageviews per month 10M": "rum_pageviews_k",
-    "WebPage Views": "rum_pageviews_k",
-    "Pageviews per month 10M ": "rum_pageviews_k",
-    "Includes GB AppLogs": "applogs_gb"
+    "Pageviews per month 10M": "rum_pageviews_k"
   }
 }
