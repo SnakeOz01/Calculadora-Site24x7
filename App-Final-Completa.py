@@ -29,8 +29,6 @@ def addon_effective_size(opt):
         return int(size * 1_000_000)
     elif unit == "GB":
         return int(size)
-    elif unit == "TB":
-        return int(size * 1000)
     return int(size)
 
 def bom_effective_qty(name, qty):
@@ -54,8 +52,6 @@ def bom_effective_qty(name, qty):
         return qty * 50000
     if "100m" in low:
         return qty * 100000
-    if "1b" in low:
-        return qty * 1000000
     if "m(millones)" in low:
         return qty * 1000
     return qty
