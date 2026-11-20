@@ -453,7 +453,7 @@ with tab2:
                 continue
             if calc["deficit"]>0:
                 #packs_str = "\n  ||  ".join([f"{p['qty']}x {p['size']}{p['unit']} (${p['price']}/pack)" for p in calc["packs"]])
-                packs_str = "\n   ||   ".join([f"{p['qty']}x {p['size']}{p['unit']}" for p in calc["packs"]])#  (${p['price']}/pack)" 
+                packs_str = "   ||   ".join([f"{p['qty']}x {p['size']}{p['unit']}" for p in calc["packs"]])#  (${p['price']}/pack)" 
                 detail_data.append({"Categoria": cat_label,"Cantidades incluidas en plan": results[selected_plan]["included"].get(key,0), "Requeridas": totals.get(key,0), "Deficit": calc["deficit"], "Add-ons necesarios": packs_str})#:, "Costo": f"${calc['cost']}"})
                 for p in calc["packs"]:
                     desc = f"Additional {p['eff_size']}{p['unit']} {cat_label}"
