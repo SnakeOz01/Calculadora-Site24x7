@@ -254,11 +254,6 @@
             "size": 100,
             "price": 25,
             "unit": "GB"
-          },
-          {
-            "size": 1,
-            "price": 195,
-            "unit": "TB"
           }
         ],
         "synthetic": [
@@ -514,11 +509,6 @@
             "size": 100,
             "price": 30,
             "unit": "GB"
-          },
-          {
-            "size": 1,
-            "price": 240,
-            "unit": "TB"
           }
         ],
         "synthetic": [
@@ -667,7 +657,6 @@
     "VMware VeloCloud Edge device": "network",
     "Logs pushed per month 10GB": "applogs_gb",
     "Logs pushed per month 100GB": "applogs_gb",
-    "Logs pushed per month 1TB": "applogs_gb",
     "Log Retention period 7 days": "applogs_gb",
     "Log Retention period 15 days": "applogs_gb",
     "Log Retention period 30 days": "applogs_gb",
