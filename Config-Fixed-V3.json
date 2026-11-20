@@ -254,7 +254,13 @@
             "size": 100,
             "price": 25,
             "unit": "GB"
+          },
+          {
+            "size": 1000,
+            "price": 240,
+            "unit": "GB"
           }
+
         ],
         "synthetic": [
           {
@@ -508,6 +514,11 @@
           {
             "size": 100,
             "price": 30,
+            "unit": "GB"
+          },
+          {
+            "size": 1000,
+            "price": 240,
             "unit": "GB"
           }
         ],
